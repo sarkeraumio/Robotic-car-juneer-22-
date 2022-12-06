@@ -1,0 +1,121 @@
+#include <SoftwareSerial.h>
+#include <Servo.h>
+SoftwareSerial mySerial(3, 4);
+
+Servo myservo;
+
+int motor1pin1 = 8;  //pins for motor 1
+int motor1pin2 = 2;
+
+int motor2pin1 = 7;  //pins for motor 2
+int motor2pin2 = 9;
+
+int motor3pin1 = 13;  //pins for motor 3
+int motor3pin2 = 12;
+
+char IncomingVal = 0;
+
+int pos = 0;  //position of crane
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(motor1pin1, OUTPUT);
+  pinMode(motor1pin2, OUTPUT);
+  pinMode(motor2pin1, OUTPUT);
+  pinMode(motor2pin2, OUTPUT);
+  pinMode(11, OUTPUT);  //enable pins using pwn pins for analogwrite
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  myservo.attach(10);       //servo signal pin
+  Serial.begin(38400);      //initalised bluetooth
+  Serial.println("ready");  //display ready in serial monitor
+  mySerial.begin(38400);    //initialised bluetooth
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  if (mySerial.available()) {
+    IncomingVal = (int)mySerial.read() - 48;
+  }
+  if (IncomingVal == 1) {  //moves forward
+    analogWrite(11, 80);
+    analogWrite(5, 80);
+
+    digitalWrite(motor1pin1, HIGH);
+    digitalWrite(motor1pin2, LOW);
+
+    digitalWrite(motor2pin1, HIGH);
+    digitalWrite(motor2pin2, LOW);
+
+  } else if (IncomingVal == 2) {  //moves backwards
+    analogWrite(11, 80);
+    analogWrite(5, 80);
+
+    digitalWrite(motor1pin1, LOW);
+    digitalWrite(motor1pin2, HIGH);
+
+    digitalWrite(motor2pin1, LOW);
+    digitalWrite(motor2pin2, HIGH);
+
+  } else if (IncomingVal == 3) {  //turns right
+    analogWrite(11, 100);
+    analogWrite(5, 100);
+
+    digitalWrite(motor1pin1, HIGH);
+    digitalWrite(motor1pin2, LOW);
+
+    digitalWrite(motor2pin1, LOW);
+    digitalWrite(motor2pin2, HIGH);
+
+  } else if (IncomingVal == 4) {  //turns left
+    analogWrite(11, 100);
+    analogWrite(5, 100);
+
+
+    digitalWrite(motor1pin1, LOW);
+    digitalWrite(motor1pin2, HIGH);
+
+    digitalWrite(motor2pin1, HIGH);
+    digitalWrite(motor2pin2, LOW);
+  } else if (IncomingVal == 5) {  //stops all motors
+    analogWrite(11, 100);
+    analogWrite(5, 100);
+    analogWrite(6, 60);
+
+    digitalWrite(motor1pin1, LOW);
+    digitalWrite(motor1pin2, LOW);
+
+    digitalWrite(motor2pin1, LOW);
+    digitalWrite(motor2pin2, LOW);
+
+    digitalWrite(motor3pin1, LOW);
+    digitalWrite(motor3pin2, LOW);
+  } else if (IncomingVal == 6) {  //crane control
+    // analogWrite(6, 50);
+    // digitalWrite(motor3pin1, HIGH);
+    // digitalWrite(motor3pin2, LOW);
+    for (pos = 20; pos < 100; pos += 3)  // goes from 0 degrees to 180 degrees
+                                         // in steps of 1 degree
+      myservo.write(pos);                // tell servo to go to position in variable 'pos'
+    delay(30);
+  } else if (IncomingVal == 7) {  //crane control
+    // analogWrite(6, 50);
+    // digitalWrite(motor3pin1, LOW);
+    // digitalWrite(motor3pin2, HIGH);
+    for (pos = 100; pos >= 20; pos -= 3)  // goes from 180 degrees to 0 degrees
+
+      myservo.write(pos);  // tell servo to go to position in variable 'pos'
+    delay(30);
+  } else if (IncomingVal == 8) {  //crane control
+    analogWrite(6, 50);
+    digitalWrite(motor3pin1, HIGH);
+    digitalWrite(motor3pin2, LOW);
+    delay(1000);
+    digitalWrite(motor3pin1, LOW);
+    digitalWrite(motor3pin2, LOW);
+  } else if (IncomingVal == 9) {  //crane control
+    analogWrite(6, 50);
+    digitalWrite(motor3pin1, LOW);
+    digitalWrite(motor3pin2, HIGH);
+  }
+}
